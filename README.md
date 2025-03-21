@@ -8,11 +8,11 @@ Learning zig through data structures and algorithms
 
 - [x] Dynamic Array
 - [x] Linked List
-- [] Stacks
-- [] Queues
+- [ ] Stacks
+- [ ] Queues
 
 ### Algorithms
 
-- [] Linear Search
-- [] Bubble Sort
+- [ ] Linear Search
+- [ ] Bubble Sort
 
