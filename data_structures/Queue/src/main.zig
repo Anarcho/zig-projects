@@ -20,10 +20,12 @@ pub fn Queue(comptime T: type) type {
 
         pub fn enqueue(self: *@This(), item: T) !void {
             if (self.size >= self.capacity) {
+                // determining the size of the capacity
                 const new_capacity = if (self.capacity == 0) 8 else self.capacity * 2;
                 const new_items = try self.allocator.realloc(self.items, new_capacity);
-                self.items = new_items;
+
                 self.capacity = new_capacity;
+                self.items = new_items;
             }
             self.items[self.size] = item;
             self.size += 1;
@@ -33,17 +35,16 @@ pub fn Queue(comptime T: type) type {
             if (self.size == 0) {
                 return error.EmptyQueue;
             }
-
-            if (self.size <= self.capacity / 2 and self.capacity != 0) {
-                const new_capacity = self.capacity / 2;
-                const new_items = try self.allocator.realloc(self.items[1..], new_capacity);
-                self.items = new_items;
-                self.capacity = new_capacity;
-            }
-
-            self.items = self.items[1..];
+            const v = self.items[0];
+            std.mem.copyForwards(T, self.items[0..], self.items[1..]);
             self.size -= 1;
-            return self.items[0];
+            if (self.size <= self.capacity / 2) {
+                const new_capacity = if ((self.capacity / 2) <= 8) 8 else self.capacity / 2;
+                const new_items = try self.allocator.realloc(self.items, self.size);
+                self.capacity = new_capacity;
+                self.items = new_items;
+            }
+            return v;
         }
 
         pub fn deinit(self: *@This()) void {
@@ -65,7 +66,7 @@ pub fn main() !void {
     try queue.enqueue(30);
 
     _ = try queue.dequeue();
-    const x: i32 = try queue.dequeue();
+    const x = try queue.dequeue();
 
     std.debug.print("{d}\n", .{x});
 
