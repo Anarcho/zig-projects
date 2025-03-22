@@ -9,7 +9,7 @@ Learning zig through data structures and algorithms
 - [x] Dynamic Array
 - [x] Linked List
 - [x] Stacks
-- [ ] Queues
+- [x] Queues
 
 ### Algorithms
 
