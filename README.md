@@ -16,3 +16,10 @@ Learning zig through data structures and algorithms
 - [x] Linear Search
 - [ ] Bubble Sort
 
+### Concepts
+
+- [ ] SmpAllocators
+- [ ] DebugAllocators
+- [ ] ArenaAllocators
+- [ ] Build System
+- [ ] Mutex
