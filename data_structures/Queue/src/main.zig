@@ -2,7 +2,7 @@ const std = @import("std");
 
 const QueueErrors = error{EmptyQueue};
 
-pub fn Queue(comptime T: type) !type {
+pub fn Queue(comptime T: type) type {
     return struct {
         items: []T,
         size: usize,
@@ -13,16 +13,15 @@ pub fn Queue(comptime T: type) !type {
             return .{
                 .items = &[_]T{},
                 .size = 0,
-                .capacty = 0,
+                .capacity = 0,
                 .allocator = allocator,
             };
         }
 
-        pub fn enqueue(self: *@This(), item: T) void {
-            if (self.size <= self.capacity) {
+        pub fn enqueue(self: *@This(), item: T) !void {
+            if (self.size >= self.capacity) {
                 const new_capacity = if (self.capacity == 0) 8 else self.capacity * 2;
                 const new_items = try self.allocator.realloc(self.items, new_capacity);
-
                 self.items = new_items;
                 self.capacity = new_capacity;
             }
@@ -35,20 +34,16 @@ pub fn Queue(comptime T: type) !type {
                 return error.EmptyQueue;
             }
 
-            var return_item: T = undefined;
-
-            self.size -= 1;
-
             if (self.size <= self.capacity / 2 and self.capacity != 0) {
                 const new_capacity = self.capacity / 2;
-                return_item = self.item[0];
-
                 const new_items = try self.allocator.realloc(self.items[1..], new_capacity);
                 self.items = new_items;
                 self.capacity = new_capacity;
             }
 
-            self.items = self.
+            self.items = self.items[1..];
+            self.size -= 1;
+            return self.items[0];
         }
 
         pub fn deinit(self: *@This()) void {
@@ -57,4 +52,22 @@ pub fn Queue(comptime T: type) !type {
             }
         }
     };
+}
+
+pub fn main() !void {
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer _ = gpa.deinit();
+    const allocator = gpa.allocator();
+
+    var queue = Queue(i32).init(allocator);
+    try queue.enqueue(10);
+    try queue.enqueue(20);
+    try queue.enqueue(30);
+
+    _ = try queue.dequeue();
+    const x: i32 = try queue.dequeue();
+
+    std.debug.print("{d}\n", .{x});
+
+    defer queue.deinit();
 }
